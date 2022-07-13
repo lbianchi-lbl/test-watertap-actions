@@ -16,12 +16,12 @@ jobs:
         include:
           - case: case-1
             os-version: ubuntu-20.04
-            python-environment: system
+            conda-environment: ''
             python-version: '3.7'
             variant: editable
           - case: case-2
             os-version: windows-2019
-            python-environment: conda
+            conda-environment: watertap-env
             python-version: '3.9'
             variant: noneditable
     steps:
@@ -37,6 +37,6 @@ jobs:
       - name: Run action
         uses: lbianchi-lbl/test-watertap-actions/install@main
         with:
-          python-environment: ${{ matrix.python-environment }}
+          conda-environment: ${{ matrix.conda-environment }}
           python-version: ${{ matrix.python-version }}
           variant: ${{ matrix.variant }}

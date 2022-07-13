@@ -1,11 +1,11 @@
 name: Install WaterTAP
 description: Install WaterTAP
 inputs:
-  python-environment:
-    required: true
+  conda-environment:
+    required: false
     description: |
-      Type of Python environment where WaterTAP will be installed. Choices: "system", "conda"
-    default: system
+      Name of the Conda environment to use for the installation. If empty (default), Conda will not be used and the system Python will be used instead
+    default: ''
   python-version:
     required: true
     description: Python version to be installed in the environment
@@ -38,23 +38,23 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Setup Python environment
-      if: inputs.python-environment == 'system'
+    - name: Setup Python (without Conda env)
+      if: ${{ !inputs.conda-environment }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ inputs.python-version }}
-    - name: Install build dependencies
-      if: inputs.python-environment == 'system'
+    - name: Install missing build dependencies
+      if: ${{ !inputs.conda-environment }}
       shell: bash -l {0}
       run: |
         echo "::group::Output of 'pip install'"
         pip install --progress-bar off wheel
         echo "::endgroup::"
-    - name: Setup Python environment (Conda)
-      if: inputs.python-environment == 'conda'
+    - name: Setup Python in Conda env
+      if: inputs.conda-environment
       uses: conda-incubator/setup-miniconda@v2
       with:
-        activate-environment: watertap-dev
+        activate-environment: ${{ inputs.conda-environment }}
         python-version: ${{ inputs.python-version }}
     - name: Assign values (dynamically and/or from inputs)
       id: assign
