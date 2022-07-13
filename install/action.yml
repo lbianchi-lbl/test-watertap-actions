@@ -80,7 +80,7 @@ runs:
     - name: Install package with dependencies
       shell: bash -l {0}
       run: |
-        pip install --progress-bar off "${{ steps.assign.outputs.target }}"
+        pip install --progress-bar off ${{ steps.assign.outputs.target }}
     - name: Install solver dependencies (IDAES extensions)
       if: steps.assign.outputs.solver-dependencies == 'idaes-ext'
       shell: bash -l {0}
