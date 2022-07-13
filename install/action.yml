@@ -72,7 +72,7 @@ runs:
                     ;;
                 noneditable)
                     _install_url="https://github.com/${_repo_full_name}/archive/${_ref_to_install}.zip"
-                    _target="watertap @ $_install_url"
+                    _target="\"watertap @ $_install_url\""
                     ;;
                 *)
                     echo "Invalid value: $_variant"
