@@ -25,8 +25,9 @@ jobs:
             python-version: '3.9'
             variant: noneditable
     steps:
+      - uses: actions/checkout@v2
       - name: Run action
-        uses: ${{ github.repository }}/install@${{ github.sha }}
+        uses: ./install
         with:
           python-environment: ${{ matrix.python-environment }}
           python-version: ${{ matrix.python-version }}
