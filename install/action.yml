@@ -43,6 +43,13 @@ runs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ inputs.python-version }}
+    - name: Install build dependencies
+      if: inputs.python-environment == 'system'
+      shell: bash -l {0}
+      run: |
+        echo "::group::Output of 'pip install'"
+        pip install --progress-bar off wheel
+        echo "::endgroup::"
     - name: Setup Python environment (Conda)
       if: inputs.python-environment == 'conda'
       uses: conda-incubator/setup-miniconda@v2
@@ -80,15 +87,23 @@ runs:
     - name: Install package with dependencies
       shell: bash -l {0}
       run: |
+        echo "::group::Output of 'pip install ${{ steps.assign.outputs.target }}'"
         pip install --progress-bar off ${{ steps.assign.outputs.target }}
+        echo "::endgroup::"
     - name: Install solver dependencies (IDAES extensions)
       if: steps.assign.outputs.solver-dependencies == 'idaes-ext'
       shell: bash -l {0}
       run: |
+        echo "::group::Output of 'idaes get-extensions'"
         idaes get-extensions --verbose
+        echo "::endgroup::"
     - name: Install solver dependencies (fallback, conda-forge + Pyomo)
       if: steps.assign.outputs.solver-dependencies != 'idaes-ext'
       shell: bash -l {0}
       run: |
+        echo "::group::Output of 'conda install'"
         conda install --quiet --yes -c conda-forge ipopt cmake
+        echo "::endgroup::"
+        echo "::group::Output of 'pyomo build-extensions'"
         pyomo build-extensions || python -c "from pyomo.contrib.pynumero.asl import AmplInterface; exit(0) if AmplInterface.available() else exit(1)"
+        echo "::endgroup::"
