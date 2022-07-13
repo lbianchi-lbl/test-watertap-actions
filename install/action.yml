@@ -16,8 +16,8 @@ inputs:
   target:
     required: false
     description: |
-      Argument to pass to `pip install`. Choices: "auto"
-    default: auto
+      Argument to pass to `pip install`. If empty (default), it will be determined automatically
+    default: ''
   ref-to-install:
     required: false
     description: |
@@ -47,7 +47,7 @@ runs:
         python-version: ${{ inputs.python-version }}
     - name: Determine install target
       id: determine-target
-      if: inputs.target == 'auto'
+      if: inputs.target == ''
       shell: bash -l {0}
       env:
         _repo_full_name: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name || 'watertap-org/watertap' }}
@@ -70,7 +70,7 @@ runs:
     - name: Install package with dependencies
       shell: bash -l {0}
       run: |
-        pip install --progress-bar off -r "${{ outputs.target }}"
+        pip install --progress-bar off -r "${{ inputs.target || steps.determine-target.outputs.target }}"
     - name: Install solver dependencies (IDAES extensions)
       if: inputs.solver-dependencies == 'idaes-ext'
       shell: bash -l {0}
