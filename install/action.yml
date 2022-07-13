@@ -54,15 +54,18 @@ runs:
         _ref_to_install: ${{ github.event_pull_request && github.event.pull_request.head.sha || inputs.ref-to-install }}
       run: |
         case ${{ inputs.variant }} in
-          editable)
-            _target="-r requirements-dev.txt"
-            ;;
-          noneditable)
-            _install_url="https://github.com/${_repo_full_name}/archive/${_ref_to_install}.zip"
-            _target="watertap @ $_install_url"
-            ;;
-          *)
-            echo "Invalid value!" ; exit 1
+            editable)
+                _target="-r requirements-dev.txt"
+                ;;
+            noneditable)
+                _install_url="https://github.com/${_repo_full_name}/archive/${_ref_to_install}.zip"
+                _target="watertap @ $_install_url"
+                ;;
+            *)
+                echo "Invalid value!"
+                exit 1
+                ;;
+        esac
         echo "::set-output name=target::$_target"
     - name: Checkout source
       if: inputs.variant == 'editable'
