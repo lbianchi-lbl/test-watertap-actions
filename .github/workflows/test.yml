@@ -30,10 +30,6 @@ jobs:
         with:
           repository: watertap-org/watertap
           ref: main
-      - name: List dir contents
-        run: |
-          echo $PWD
-          ls -Rlath $PWD
       - name: Run action
         uses: lbianchi-lbl/test-watertap-actions/install@main
         with:
