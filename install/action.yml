@@ -50,10 +50,11 @@ runs:
       if: inputs.target == ''
       shell: bash -l {0}
       env:
+        _variant: ${{ inputs.variant }}
         _repo_full_name: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name || 'watertap-org/watertap' }}
         _ref_to_install: ${{ github.event_pull_request && github.event.pull_request.head.sha || inputs.ref-to-install }}
       run: |
-        case ${{ inputs.variant }} in
+        case "$_variant" in
             editable)
                 _target="-r requirements-dev.txt"
                 ;;
@@ -62,7 +63,7 @@ runs:
                 _target="watertap @ $_install_url"
                 ;;
             *)
-                echo "Invalid value!"
+                echo "Invalid value: $_variant"
                 exit 1
                 ;;
         esac
