@@ -25,9 +25,13 @@ jobs:
             python-version: '3.9'
             variant: noneditable
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        if: matrix.variant == 'editable'
+        with:
+          repository: watertap-org/watertap
+          ref: main
       - name: Run action
-        uses: ./install
+        uses: lbianchi-lbl/test-watertap-actions/install@main
         with:
           python-environment: ${{ matrix.python-environment }}
           python-version: ${{ matrix.python-version }}

@@ -77,12 +77,6 @@ runs:
         echo "::set-output name=repo-full-name::$_repo_full_name"
         echo "::set-output name=ref-to-install::$_ref_to_install"
         echo "::set-output name=solver-dependencies::${{ inputs.solver-dependencies }}"
-    - name: Checkout source
-      if: inputs.variant == 'editable'
-      uses: actions/checkout@v2
-      with:
-        repository: ${{ steps.assign.outputs.repo-full-name }}
-        ref: ${{ steps.assign.outputs.ref-to-install }}
     - name: Install package with dependencies
       shell: bash -l {0}
       run: |
