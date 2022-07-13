@@ -1,0 +1,84 @@
+name: Install WaterTAP
+description: Install WaterTAP
+inputs:
+  python-environment:
+    required: true
+    description: |
+      Type of Python environment where WaterTAP will be installed. Choices: "system", "conda"
+    default: system
+  python-version:
+    required: true
+    description: Python version to be installed in the environment
+  variant:
+    required: true
+    description: |
+      Which installation variant to use. Choices: "editable", "noneditable"
+  target:
+    required: false
+    description: |
+      Argument to pass to `pip install`. Choices: "auto"
+    default: auto
+  ref-to-install:
+    required: false
+    description: |
+      Git ref to install
+    default: main
+  solver-dependencies:
+    required: false
+    description: How to install solver dependencies. If "idaes-ext", the `idaes get-extensions` command will be used.
+    default: idaes-ext
+outputs:
+  target:
+    description: Installation target
+    value: ${{ inputs.target || steps.determine-target.outputs.target }}
+runs:
+  using: composite
+  steps:
+    - name: Setup Python environment
+      if: inputs.python-environment == 'system'
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Setup Python environment (Conda)
+      if: inputs.python-environment == 'conda'
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: watertap-dev
+        python-version: ${{ inputs.python-version }}
+    - name: Determine install target
+      id: determine-target
+      if: inputs.target == 'auto'
+      shell: bash -l {0}
+      env:
+        _repo_full_name: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name || 'watertap-org/watertap' }}
+        _ref_to_install: ${{ github.event_pull_request && github.event.pull_request.head.sha || inputs.ref-to-install }}
+      run: |
+        case ${{ inputs.variant }} in
+          editable)
+            _target="-r requirements-dev.txt"
+            ;;
+          noneditable)
+            _install_url="https://github.com/${_repo_full_name}/archive/${_ref_to_install}.zip"
+            _target="watertap @ $_install_url"
+            ;;
+          *)
+            echo "Invalid value!" ; exit 1
+        echo "::set-output name=target::$_target"
+    - name: Checkout source
+      if: inputs.variant == 'editable'
+      uses: actions/checkout@v2
+    - name: Install package with dependencies
+      shell: bash -l {0}
+      run: |
+        pip install --progress-bar off -r "${{ outputs.target }}"
+    - name: Install solver dependencies (IDAES extensions)
+      if: inputs.solver-dependencies == 'idaes-ext'
+      shell: bash -l {0}
+      run: |
+        idaes get-extensions --verbose
+    - name: Install solver dependencies (fallback, conda-forge + Pyomo)
+      if: inputs.solver-dependencies != 'idaes-ext'
+      shell: bash -l {0}
+      run: |
+        conda install --quiet --yes -c conda-forge ipopt cmake
+        pyomo build-extensions || python -c "from pyomo.contrib.pynumero.asl import AmplInterface; exit(0) if AmplInterface.available() else exit(1)"

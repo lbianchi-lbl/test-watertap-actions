@@ -1,0 +1,33 @@
+name: Test actions
+
+on:
+  push:
+
+jobs:
+  install:
+    name: Test 'install' action (${{ matrix.case }})
+    runs-on: ${{ matrix.os-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        case:
+          - case-1
+          - case-2
+        include:
+          - case: case-1
+            os-version: ubuntu-20.04
+            python-environment: system
+            python-version: '3.7'
+            variant: editable
+          - case: case-2
+            os-version: windows-2019
+            python-environment: conda
+            python-version: '3.9'
+            variant: noneditable
+    steps:
+      - name: Run action
+        uses: ${{ github.repository }}/install@${{ github.sha }}
+        with:
+          python-environment: ${{ matrix.python-environment }}
+          python-version: ${{ matrix.python-version }}
+          variant: ${{ matrix.variant }}
