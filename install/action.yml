@@ -40,6 +40,11 @@ inputs:
     required: false
     default: watertap
 
+  pip-install-target:
+    description: Argument passed to `pip install`
+    required: false
+    default: "${{ inputs.variant == 'dev' ? '-r requirements.txt' : format('{0}[{1}] @ git+https://github.com/{2}@{3}', inputs.python-distribution-name, 'testing', inputs.repository, inputs.ref ) }}"
+
   solver-dependencies:
     required: false
     description: How to install solver dependencies. If "idaes-ext", the `idaes get-extensions` command will be used.
@@ -70,22 +75,11 @@ runs:
         activate-environment: ${{ inputs.conda-environment }}
         python-version: ${{ inputs.python-version }}
 
-    - name: Install package with dependencies (variant=${{ inputs.variant }})
+    - name: Install package with dependencies (target=${{ inputs.pip-install-target }})
       shell: bash -l {0}
-      if: inputs.variant == 'dev'
       run: |
         echo "::group::Output of 'pip install' command"
-        pip install --progress-bar off -r requirements-dev.txt
-        echo "::endgroup::"
-
-    - name: Install package with dependencies (variant=${{ inputs.variant }})
-      shell: bash -l {0}
-      if: inputs.variant == 'site'
-      env:
-        _pip_target: git+https://github.com/${{ inputs.repository }}@${{ inputs.ref }}
-      run: |
-        echo "::group::Output of 'pip install' command"
-        pip install --progress-bar off "$_pip_target"
+        pip install --progress-bar off "${{ inputs.pip-install-target }}"
         echo "::endgroup::"
 
     - name: Install solver dependencies (IDAES extensions)
