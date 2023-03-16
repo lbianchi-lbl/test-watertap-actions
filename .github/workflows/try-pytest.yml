@@ -1,3 +1,6 @@
+
+concurrency: Try pytest
+
 on:
   push:
 
@@ -12,4 +15,5 @@ jobs:
       python-versions-json: '["3.8", "3.10"]'
       platforms-json: '["linux", "win64"]'
       variants-json: '["dev", "site"]'
-
+      pytest-flags: --pyargs watertap.core
+      pytest-extra-flags: -m unit
