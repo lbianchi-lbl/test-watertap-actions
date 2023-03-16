@@ -32,6 +32,18 @@ on:
         required: false
         default: '["linux", "win64", "macos"]'
 
+      platform-to-runner-map-json:
+        type: string
+        description: JSON string representing mapping between platform and runner label
+        required: false
+        default: |
+          {
+              "linux": "ubuntu-20.04",
+              "win64": "windows-2022",
+              "macos": "macos-12",
+              "": "ubuntu-latest"
+          }
+
       pytest-flags:
         type: string
         description: Default flags to use for pytest
@@ -52,20 +64,14 @@ jobs:
 
   pytest:
     name: pytest/${{ matrix.variant }}/${{ matrix.python-version }}/${{ matrix.platform }}
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ fromJSON(inputs.platform-to-runner-map-json)[matrix.platform] }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         variant: ${{ fromJSON(inputs.variants-json) }}
         python-version: ${{ fromJSON(inputs.python-versions-json) }}
         platform: ${{ fromJSON(inputs.platforms-json) }}
-        include:
-          - platform: linux
-            runner: ubuntu-20.04
-          - platform: win64
-            runner: windows-2022
-          - platform: macos
-            runner: macos-latest
+
     steps:
 
       - uses: actions/checkout@v3
