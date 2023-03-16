@@ -78,16 +78,14 @@ runs:
         ref: ${{ inputs.ref || github.ref }}
         PIP_PROGRESS_BAR: "off"
       run: |
+        echo "::group::Output of install command"
         if [ $variant = 'dev' ] ; then
-            cmd='pip install -r requirements-dev.txt'
+            pip install -r requirements-dev.txt
         elif [ $variant = 'site' ] ; then
-            cmd="pip install \"watertap[testing] @ git+${repository_url}@${ref}\""
+            pip install "watertap[testing] @ git+${repository_url}@${ref}"
         else
-            cmd=$variant
+            pip install $variant
         fi
-
-        echo "::group::Output of install command: $cmd"
-        $cmd
         echo "::endgroup::"
 
     - name: Install solver dependencies (IDAES extensions)
