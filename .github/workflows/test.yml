@@ -34,7 +34,7 @@ jobs:
             variant: site
             solver-dependencies: idaes-ext
 
-          - case: case-3
+          - case: case-4
             os-version: macos-latest
             conda-environment: watertap-env
             python-version: '3.9'
