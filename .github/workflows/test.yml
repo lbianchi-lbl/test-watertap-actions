@@ -42,14 +42,17 @@ jobs:
             solver-dependencies: conda-forge
 
     steps:
+
       - uses: actions/checkout@v3
         if: matrix.variant == 'dev'
         with:
           repository: watertap-org/watertap
           ref: main
+
       - name: Run action
         uses: lbianchi-lbl/test-watertap-actions/install@main
         with:
           conda-environment: ${{ matrix.conda-environment }}
           python-version: ${{ matrix.python-version }}
           variant: ${{ matrix.variant }}
+          collect-info: ${{ matrix.case }}-install-info
