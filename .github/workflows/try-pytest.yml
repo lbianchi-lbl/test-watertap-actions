@@ -7,6 +7,8 @@ jobs:
   call-pytest:
     uses: ./.github/workflows/pytest.yml
     with:
+      repository: watertap-org/watertap
+      ref: main
       python-versions-json: '["3.8", "3.10"]'
       platforms-json: '["linux", "win64"]'
       variants-json: '["dev", "site"]'
