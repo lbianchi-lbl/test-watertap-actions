@@ -59,6 +59,11 @@ runs:
   using: composite
   steps:
 
+    - name: Create collect-info directory
+      if: inputs.collect-info
+      shell: bash
+      run: mkdir -v "${{ inputs.collect-info }}"
+
     - name: Setup Python (without Conda env)
       if: ${{ !inputs.conda-environment }}
       uses: actions/setup-python@v4
@@ -139,7 +144,7 @@ runs:
 
     - name: Collect env info (conda env export)
       shell: bash -l {0}
-      if: inputs.conda
+      if: inputs.conda-environment
       env:
         path: ${{ inputs.collect-info }}/environment.yml
       run: |
@@ -150,3 +155,8 @@ runs:
       with:
         path: ${{ inputs.collect-info }}
         name: ${{ inputs.collect-info }}
+
+    - name: Remove collect-info directory
+      if: inputs.collect-info
+      shell: bash
+      run: rm -rv "${{ inputs.collect-info }}"
