@@ -75,7 +75,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Install WaterTAP
-        uses: ./install
+        uses: lbianchi-lbl/test-watertap-actions/install@main
         with:
           conda-environment: watertap-env
           python-version: ${{ matrix.python-version }}
