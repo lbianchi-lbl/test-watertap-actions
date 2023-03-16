@@ -51,7 +51,7 @@ env:
 jobs:
 
   pytest:
-    name: pytest/${{ matrix.variant }}/{{ matrix.python-version }}/${{ matrix.platform }}
+    name: pytest/${{ matrix.variant }}/${{ matrix.python-version }}/${{ matrix.platform }}
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: true
