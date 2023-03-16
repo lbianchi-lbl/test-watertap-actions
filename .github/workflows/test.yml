@@ -2,6 +2,8 @@ name: Test actions
 
 on:
   push:
+    branches-ignore:
+      - main
 
 jobs:
   install:
