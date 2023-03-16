@@ -56,6 +56,9 @@ on:
         required: false
         default: ''
 
+defaults:
+  run:
+    shell: bash -l {0}
 
 env:
   PYTEST_ADDOPTS: color=yes
