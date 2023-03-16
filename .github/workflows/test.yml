@@ -14,16 +14,33 @@ jobs:
           - case-1
           - case-2
         include:
+
           - case: case-1
             os-version: ubuntu-20.04
             conda-environment: ''
             python-version: '3.7'
             variant: dev
+
           - case: case-2
             os-version: windows-2019
             conda-environment: watertap-env
             python-version: '3.9'
             variant: site
+
+          - case: case-3
+            os-version: macos-latest
+            conda-environment: watertap-env
+            python-version: '3.9'
+            variant: site
+            solver-dependencies: idaes-ext
+
+          - case: case-3
+            os-version: macos-latest
+            conda-environment: watertap-env
+            python-version: '3.9'
+            variant: site
+            solver-dependencies: conda-forge
+
     steps:
       - uses: actions/checkout@v3
         if: matrix.variant == 'dev'
