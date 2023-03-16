@@ -1,6 +1,8 @@
 name: Try pytest
 
-concurrency: Try pytest
+concurrency:
+  group: Try pytest
+  cancel-in-progress: true
 
 on:
   push:

@@ -56,12 +56,24 @@ on:
         required: false
         default: ''
 
+      python-version-for-coverage:
+        type: string
+        description: Which of the Python versions used in the matrix to use to generate coverage report
+        required: false
+        default: '3.8'
+
+      coverage-file:
+        type: string
+        description: File name for the coverage fiel
+        required: false
+        default: coverage.xml
+
 defaults:
   run:
     shell: bash -l {0}
 
 env:
-  PYTEST_ADDOPTS: --color=yes
+  PYTEST_ADDOPTS: --color=yes ${{ inputs.pytest-flags }} ${{ inputs.pytest-extra-flags }}
 
 jobs:
 
@@ -74,6 +86,10 @@ jobs:
         variant: ${{ fromJSON(inputs.variants-json) }}
         python-version: ${{ fromJSON(inputs.python-versions-json) }}
         platform: ${{ fromJSON(inputs.platforms-json) }}
+        include:
+          - python-version: ${{ inputs.python-version-for-coverage }}
+            variant: dev
+            coverage: ${{ inputs.coverage-file }}
 
     steps:
 
@@ -91,8 +107,18 @@ jobs:
           variant: ${{ matrix.variant }}
           collect-info: ${{ matrix.variant }}-${{ matrix.python-version }}-${{ matrix.platform }}-install-info
 
+      - name: Add coverage options
+        if: matrix.coverage
+        run:
+          echo "PYTEST_ADDOPTS=$PYTEST_ADDOPTS --cov-report=xml" >> $GITHUB_ENV
+
       - name: Run Pytest
-        env:
-          PYTEST_ADDOPTS: ${{ env.PYTEST_ADDOPTS }} ${{ inputs.pytest-flags }} ${{ inputs.pytest-extra-flags }}
         run:
           pytest
+
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v3
+        if: matrix.coverage
+        with:
+          name: ${{ matrix.platform }}-coverage
+          path: ${{ inputs.coverage-file }}
