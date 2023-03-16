@@ -18,15 +18,15 @@ jobs:
             os-version: ubuntu-20.04
             conda-environment: ''
             python-version: '3.7'
-            variant: editable
+            variant: dev
           - case: case-2
             os-version: windows-2019
             conda-environment: watertap-env
             python-version: '3.9'
-            variant: noneditable
+            variant: site
     steps:
       - uses: actions/checkout@v3
-        if: matrix.variant == 'editable'
+        if: matrix.variant == 'dev'
         with:
           repository: watertap-org/watertap
           ref: main

@@ -1,48 +1,60 @@
 name: Install WaterTAP
 description: Install WaterTAP
+
 inputs:
+
   conda-environment:
     required: false
     description: |
       Name of the Conda environment to use for the installation. If empty (default), Conda will not be used and the system Python will be used instead
     default: ''
+
   python-version:
     required: true
     description: Python version to be installed in the environment
+
   variant:
     required: true
     description: |
-      Which installation variant to use. Choices: "editable", "noneditable"
+      Which installation variant to use. Choices: "dev", "site"
+
   target:
     required: false
     description: |
       Argument to pass to `pip install`. If empty (default), it will be determined automatically
     default: ''
-  repo-full-name:
+
+  repository:
     required: false
     description: Full name (i.e. user/repo) of the repository to install
     default: watertap-org/watertap
-  ref-to-install:
+
+  ref:
     required: false
     description: |
       Git ref to install
     default: main
+
+  python-distribution-name:
+    description: Name of the Python package distribution, as it appears on e.g. PyPI
+    required: false
+    default: watertap
+
   solver-dependencies:
     required: false
     description: How to install solver dependencies. If "idaes-ext", the `idaes get-extensions` command will be used.
     default: idaes-ext
-outputs:
-  target:
-    description: Installation target
-    value: ${{ steps.assign.outputs.target }}
+
 runs:
   using: composite
   steps:
+
     - name: Setup Python (without Conda env)
       if: ${{ !inputs.conda-environment }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python-version }}
+
     - name: Install missing build dependencies
       if: ${{ !inputs.conda-environment }}
       shell: bash -l {0}
@@ -50,55 +62,42 @@ runs:
         echo "::group::Output of 'pip install'"
         pip install --progress-bar off wheel
         echo "::endgroup::"
+
     - name: Setup Python in Conda env
       if: inputs.conda-environment
       uses: conda-incubator/setup-miniconda@v2
       with:
         activate-environment: ${{ inputs.conda-environment }}
         python-version: ${{ inputs.python-version }}
-    - name: Assign values (dynamically and/or from inputs)
-      id: assign
+
+    - name: Install package with dependencies (variant=${{ inputs.variant }})
       shell: bash -l {0}
-      env:
-        _target: ${{ inputs.target }}
-        _variant: ${{ inputs.variant }}
-        _repo_full_name: ${{ github.event.pull_request && github.event.pull_request.head.repo.full_name || inputs.repo-full-name }}
-        _ref_to_install: ${{ github.event_pull_request && github.event.pull_request.head.sha || inputs.ref-to-install }}
+      if: variant == 'dev'
       run: |
-        if [ -z "$_target" ] ; then
-            case "$_variant" in
-                editable)
-                    _target="-r requirements-dev.txt"
-                    ;;
-                noneditable)
-                    _install_url="https://github.com/${_repo_full_name}/archive/${_ref_to_install}.zip"
-                    _target="\"watertap @ $_install_url\""
-                    ;;
-                *)
-                    echo "Invalid value: $_variant"
-                    exit 1
-                    ;;
-            esac
-        fi
-        echo "::set-output name=target::$_target"
-        echo "::set-output name=repo-full-name::$_repo_full_name"
-        echo "::set-output name=ref-to-install::$_ref_to_install"
-        echo "::set-output name=solver-dependencies::${{ inputs.solver-dependencies }}"
-    - name: Install package with dependencies
-      shell: bash -l {0}
-      run: |
-        echo "::group::Output of 'pip install ${{ steps.assign.outputs.target }}'"
-        pip install --progress-bar off ${{ steps.assign.outputs.target }}
+        echo "::group::Output of 'pip install' command"
+        pip install --progress-bar off -r requirements-dev.txt
         echo "::endgroup::"
+
+    - name: Install package with dependencies (variant=${{ inputs.variant }})
+      shell: bash -l {0}
+      if: variant == 'user'
+      env:
+        _pip_target: git+https://github.com/${{ inputs.repository }}@${{ inputs.ref }}
+      run: |
+        echo "::group::Output of 'pip install' command"
+        pip install --progress-bar off "$_pip_target"
+        echo "::endgroup::"
+
     - name: Install solver dependencies (IDAES extensions)
-      if: steps.assign.outputs.solver-dependencies == 'idaes-ext'
+      if: inputs.solver-dependencies == 'idaes-ext'
       shell: bash -l {0}
       run: |
         echo "::group::Output of 'idaes get-extensions'"
         idaes get-extensions --verbose
         echo "::endgroup::"
-    - name: Install solver dependencies (fallback, conda-forge + Pyomo)
-      if: steps.assign.outputs.solver-dependencies != 'idaes-ext'
+
+    - name: Install solver dependencies (conda-forge + Pyomo)
+      if: inputs.solver-dependencies != 'idaes-ext'
       shell: bash -l {0}
       run: |
         echo "::group::Output of 'conda install'"
