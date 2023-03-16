@@ -81,7 +81,7 @@ runs:
         if [ $variant = 'dev' ] ; then
             cmd='pip install -r requirements-dev.txt'
         elif [ $variant = 'site' ] ; then
-            cmd='pip install "watertap[testing] @ git+${repository_url}@${ref}"'
+            cmd="pip install \"watertap[testing] @ git+${repository_url}@${ref}\""
         else
             cmd=$variant
         fi
