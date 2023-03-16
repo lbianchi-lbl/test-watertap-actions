@@ -108,13 +108,13 @@ runs:
       shell: bash -l {0}
       env:
         PIP_PROGRESS_BAR: "off"
-        # path: ${{ inputs.install-script }}
+        _install_script_path: ${{ inputs.install-script }}
       run: |
-        cat "${{ inputs.install-script }}"
+        cat "$_install_script_path"
         echo "::group::Output of install command"
-        . "${{ inputs.install-script }}"
+        . "$_install_script_path"
         echo "::endgroup::"
-        mv "${{ inputs.install-script }}" "${{ inputs.collect-info }}"
+        mv "$_install_script_path" "${{ inputs.collect-info }}"
 
     - name: Install solver dependencies (IDAES extensions)
       if: inputs.solver-dependencies == 'idaes-ext'
@@ -138,17 +138,17 @@ runs:
     - name: Collect env info (pip freeze)
       shell: bash -l {0}
       env:
-        path: ${{ inputs.collect-info }}/requirements.txt
+        _pip_file_path: ${{ inputs.collect-info }}/requirements.txt
       run: |
-        pip freeze > "$path"
+        pip freeze > "$_pip_file_path"
 
     - name: Collect env info (conda env export)
       shell: bash -l {0}
       if: inputs.conda-environment
       env:
-        path: ${{ inputs.collect-info }}/environment.yml
+        _conda_file_path: ${{ inputs.collect-info }}/environment.yml
       run: |
-        conda env export -f "$path"
+        conda env export -f "$_conda_file_path"
 
     - name: Save env info as artifact
       uses: actions/upload-artifact@v3
