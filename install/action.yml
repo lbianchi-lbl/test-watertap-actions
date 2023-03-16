@@ -108,13 +108,13 @@ runs:
       shell: bash -l {0}
       env:
         PIP_PROGRESS_BAR: "off"
-        path: ${{ inputs.install-script }}
+        # path: ${{ inputs.install-script }}
       run: |
-        cat "$path"
+        cat "${{ inputs.install-script }}"
         echo "::group::Output of install command"
-        . "$path"
+        . "${{ inputs.install-script }}"
         echo "::endgroup::"
-        mv "$path" ${{ inputs.collect-info }}
+        mv "${{ inputs.install-script }}" "${{ inputs.collect-info }}"
 
     - name: Install solver dependencies (IDAES extensions)
       if: inputs.solver-dependencies == 'idaes-ext'
