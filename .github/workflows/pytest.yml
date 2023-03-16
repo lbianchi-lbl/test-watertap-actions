@@ -1,0 +1,89 @@
+name: Pytest
+
+on:
+  workflow_call:
+    inputs:
+
+      repository:
+        type: string
+        required: false
+        default: ${{ github.repository }}
+
+      ref:
+        type: string
+        required: false
+        default: ${{ github.ref }}
+
+      variants-json:
+        type: string
+        description: Environment/installation variants to include in job combinations as a JSON array string
+        required: false
+        default: '["dev", "site"]'
+
+      python-versions-json:
+        type: string
+        description: Python versions to include in job combinations as a JSON array string
+        required: false
+        default: '["3.8", "3.9", "3.10"]'
+
+      platforms-json:
+        type: string
+        description: Platforms (OS variants) to include in job combinations as a JSON array string
+        required: false
+        default: '["linux", "win64", "macos"]'
+
+      pytest-flags:
+        type: string
+        description: Default flags to use for pytest
+        required: false
+        default: --pyargs watertap
+      
+      pytest-extra-flags:
+        type: string
+        description: Additional flags to pass to pytest
+        required: false
+        default: ''
+
+
+env:
+  PYTEST_ADDOPTS: color=yes
+
+jobs:
+
+  pytest:
+    name: pytest/${{ matrix.variant }}/{{ matrix.python-version }}/${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: true
+      matrix:
+        variant: ${{ fromJSON(inputs.variants-json) }}
+        python-version: ${{ fromJSON(inputs.python-versions-json) }}
+        platform: ${{ fromJSON(inputs.platforms-json) }}
+        include:
+          - platform: linux
+            runner: ubuntu-20.04
+          - platform: win64
+            runner: windows-2022
+          - platform: macos
+            runner: macos-latest
+    steps:
+
+      - uses: actions/checkout@v3
+        if: matrix.variant == 'dev'
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.ref }}
+
+      - name: Install WaterTAP
+        uses: ./install
+        with:
+          conda-environment: watertap-env
+          python-version: ${{ matrix.python-version }}
+          variant: ${{ matrix.variant }}
+          collect-info: ${{ join([matrix.variant, matrix.python-version, matrix-platform, 'install-info'], '-') }}
+
+      - name: Run Pytest
+        env:
+          PYTEST_ADDOPTS: ${{ join([env.PYTEST_ADDOPTS, inputs.pytest-flags, inputs.pytest-extra-flags], ' ')}}
+        run:
+          pytest
