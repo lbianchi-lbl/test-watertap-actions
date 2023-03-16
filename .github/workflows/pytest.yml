@@ -80,10 +80,10 @@ jobs:
           conda-environment: watertap-env
           python-version: ${{ matrix.python-version }}
           variant: ${{ matrix.variant }}
-          collect-info: ${{ join([matrix.variant, matrix.python-version, matrix-platform, 'install-info'], '-') }}
+          collect-info: ${{ matrix.variant }}-${{ matrix.python-version }}-${{ matrix.platform }}-install-info
 
       - name: Run Pytest
         env:
-          PYTEST_ADDOPTS: ${{ join([env.PYTEST_ADDOPTS, inputs.pytest-flags, inputs.pytest-extra-flags], ' ')}}
+          PYTEST_ADDOPTS: ${{ env.PYTEST_ADDOPTS }} ${{ inputs.pytest-flags }} ${{ inputs.pytest-extra-flags }}
         run:
           pytest
