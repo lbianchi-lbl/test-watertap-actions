@@ -77,7 +77,7 @@ env:
 
 jobs:
 
-  pytest:
+  run-pytest:
     name: pytest/${{ matrix.variant }}/${{ matrix.python-version }}/${{ matrix.platform }}
     runs-on: ${{ fromJSON(inputs.platform-to-runner-map-json)[matrix.platform] }}
     strategy:
@@ -120,5 +120,34 @@ jobs:
         uses: actions/upload-artifact@v3
         if: matrix.coverage
         with:
-          name: ${{ matrix.platform }}-coverage
-          path: ${{ inputs.coverage-file }}
+          name: ${{ matrix.platform }}-${{ inputs.coverage-file }}
+          path: |
+            .coverage
+            coverage.xml
+
+  upload-coverage:
+    name: Upload coverage report (${{ matrix.platform }})
+    needs: [run-pytest]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(inputs.platforms-json) }}
+
+    steps:
+
+      - name: Download coverage report (${{ matrix.platform }})
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.platform }}-${{ inputs.coverage-file }}
+
+      - uses: actions/setup-python@v4
+
+      - name: Upload coverage report (placeholder)
+        run: |
+          pip install --progress-bar off "coverage>=7"
+          cat << EOF >> "$GITHUB_STEP_SUMMARY"
+          # Coverage report for `${{ matrix.platform }}`
+          $(coverage report --data-file=.coverage --format=markdown) >>
+          EOF
+
