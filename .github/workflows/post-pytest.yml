@@ -22,4 +22,4 @@ jobs:
 
           gh run download --repo ${{ github.repository }} --pattern="*coverage*"
 
-          ls -lrth .
+          ls -lRth .
