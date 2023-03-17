@@ -47,13 +47,13 @@ runs:
       run: |
         cat << EOF >> $GITHUB_STEP_SUMMARY
 
-        ${{ inputs.collapse ? format('<details><summary>{0}</summary>', inputs.collapse) : ''}}
+        ${{ inputs.collapse && format('<details><summary>{0}</summary>', inputs.collapse) || ''}}
 
         \`\`\`json
         $(jq <<< '${{ inputs.json }}')
         \`\`\`
 
-        ${{ inputs.collapse ? '</details>' : ''}}
+        ${{ inputs.collapse && '</details>' || ''}}
         EOF
 
     - shell: bash {0}
