@@ -155,7 +155,12 @@ jobs:
         run: |
           pip install --progress-bar off "coverage>=7"
           cat << EOF >> "$GITHUB_STEP_SUMMARY"
-          # Coverage report for ${{ matrix.platform }}
+          ## Coverage report for ${{ matrix.platform }}
+
+          <details><summary>Click to expand</summary>
+
           $(coverage report --data-file=.coverage --format=markdown)
+
+          </details>
           EOF
 
