@@ -3,7 +3,7 @@ name: Post-pytest
 on:
   workflow_run:
     types: [completed]
-    workflows: [Pytest]
+    workflows: [Try pytest]
 
 jobs:
 
