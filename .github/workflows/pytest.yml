@@ -105,7 +105,7 @@ jobs:
           conda-environment: watertap-env
           python-version: ${{ matrix.python-version }}
           variant: ${{ matrix.variant }}
-          collect-info: ${{ matrix.variant }}-${{ matrix.python-version }}-${{ matrix.platform }}-install-info
+          collect-info: install-info-${{ matrix.variant }}-${{ matrix.python-version }}-${{ matrix.platform }}
 
       - name: Add coverage options
         if: matrix.coverage
@@ -120,7 +120,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: matrix.coverage
         with:
-          name: ${{ matrix.platform }}-${{ inputs.coverage-file }}
+          name: coverage-${{ matrix.platform }}
           path: |
             .coverage
             coverage.xml
@@ -139,7 +139,7 @@ jobs:
       - name: Download coverage report (${{ matrix.platform }})
         uses: actions/download-artifact@v3
         with:
-          name: ${{ matrix.platform }}-${{ inputs.coverage-file }}
+          name: coverage-${{ matrix.platform }}
 
       - uses: actions/setup-python@v4
 
