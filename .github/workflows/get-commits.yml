@@ -1,0 +1,86 @@
+name: Get commits
+
+on:
+  workflow_call:
+    inputs:
+
+      repository:
+        type: string
+        description: Full name of the repository to get commits
+        required: true
+
+      since:
+        type: string
+        description: Start of time range to search for commits in any format supported by Git (e.g. '6 days ago')
+        required: true
+
+      ref:
+        type: string
+        description: Git ref to check out before searching for commits
+        required: false
+        default: main
+
+    outputs:
+
+      shas-json:
+        description: Commits found in the given time range, as a JSON array string of SHAs
+        value: ${{ jobs.set-commits.outputs.commits }}
+
+      time-range-start:
+        description: Start of the time range
+        value: ${{ inputs.since }}
+
+jobs:
+  set-commits:
+    runs-on: ubuntu-latest
+    outputs:
+      commits: ${{ steps.set-commits.outputs.commits }}
+
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - id: set-commits
+        shell: python
+        env:
+          GIT_LOG_START: ${{ inputs.since }}
+        run: |
+          import json
+          import os
+          from pathlib import Path
+          from subprocess import check_output
+          import sys
+
+
+          def _set_output(name: str, value: str) -> None:
+              with Path(os.environ["GITHUB_OUTPUT"]).open("at") as outf:
+                  outf.write(f"{name}={value}")
+
+
+          def _get_git_commits(start: str, fmt="%H") -> list[str]:
+              args = [
+                  "git", "log",
+                  "--since", str(start),
+                  f"--format={fmt}", 
+              ]
+              out = check_output(args, text=True).strip()
+              return out.splitlines()
+
+
+          def main(args=None):
+              args = args or sys.argv[1:]
+              git_log_start = args[0]
+              commits = _get_git_commits(git_log_start)
+              _set_output("commits", json.dumps(commits))
+
+          if __name__ == "__main__":
+              start = os.environ["GIT_LOG_START"]
+              main([start])
