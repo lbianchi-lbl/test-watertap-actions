@@ -1,0 +1,80 @@
+name: Summarize
+description: Convenience wrapper to render different snippets of data to GITHUB_STEP_SUMMARY
+
+inputs:
+  header:
+    description: Header to display before content
+    required: false
+    default: ""
+  separator:
+    description: Separator to add after content
+    required: false
+    default: ---
+
+  json:
+    description: JSON string, to be rendered in a `json` syntax block
+    required: false
+    default: ''
+
+  command:
+    description: Run command and display output in a `log` syntax block
+    default: ""
+    required: false
+    
+  collapse:
+    description: If given, will wrap in a <details></details> tag with the argument as <summary>
+    required: false
+    default: ""
+
+
+runs:
+  using: composite
+  steps:
+
+    - shell: bash {0}
+      run: |
+        cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+        ${{ inputs.header }}
+
+        EOF
+
+    - shell: bash {0}
+      if: inputs.collapse
+      run: |
+        cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+        <details><summary>${{ inputs.collapse }}</summary>
+
+        EOF
+
+    - shell: bash {0}
+      if: inputs.json
+      run: |
+        cat << EOF >> $GITHUB_STEP_SUMMARY
+
+        \`\`\`json
+        $(jq <<< '${{ inputs.json }}')
+        \`\`\`
+
+        EOF
+
+    - shell: bash {0}
+      if: inputs.command
+      run: |
+        cat << EOF >> $GITHUB_STEP_SUMMARY
+
+        Output of \`${{ inputs.command }}\`:
+
+        \`\`\`log
+        $(${{ inputs.command }})
+        \`\`\`
+
+        EOF
+
+    - shell: bash {0}
+      if: inputs.collapse
+      run: |
+        cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+
+        </details>
+
+        EOF

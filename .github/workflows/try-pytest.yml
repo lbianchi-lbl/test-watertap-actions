@@ -23,14 +23,10 @@ jobs:
 
     steps:
 
-      - run: |
-          cat << EOF >> $GITHUB_STEP_SUMMARY
-
-          \`\`\`json
-          $(jq <<< '${{ toJSON(needs.get-commits-since.outputs) }}')
-          \`\`\`
-
-          EOF
+      - uses: lbianchi-lbl/test-watertap-actions/summarize@main
+        with:
+          json: ${{ toJSON(needs.get-commits-since.outputs) }}
+          collapse: needs.get-commits-since.outputs
 
   call-pytest:
     needs: [get-commits-since]
