@@ -43,22 +43,17 @@ runs:
         EOF
 
     - shell: bash {0}
-      if: inputs.collapse
-      run: |
-        cat << 'EOF' >> $GITHUB_STEP_SUMMARY
-        <details><summary>${{ inputs.collapse }}</summary>
-
-        EOF
-
-    - shell: bash {0}
       if: inputs.json
       run: |
         cat << EOF >> $GITHUB_STEP_SUMMARY
+
+        ${{ inputs.collapse ? format('<details><summary>{0}</summary>', inputs.collapse) : ''}}
 
         \`\`\`json
         $(jq <<< '${{ inputs.json }}')
         \`\`\`
 
+        ${{ inputs.collapse ? '</details>' : ''}}
         EOF
 
     - shell: bash {0}
@@ -74,16 +69,8 @@ runs:
 
         EOF
 
-    - shell: bash {0}
-      if: inputs.collapse
-      run: |
-        cat << 'EOF' >> $GITHUB_STEP_SUMMARY
-
-        </details>
-
-        EOF
-
     - if: inputs.save-as
       shell: bash {0}
       run: |
         cat $GITHUB_STEP_SUMMARY
+
