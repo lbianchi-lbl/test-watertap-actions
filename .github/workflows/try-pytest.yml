@@ -17,6 +17,21 @@ jobs:
       ref: main
       since: 3 days ago
 
+  display-commits:
+    runs-on: ubuntu-latest
+    needs: [get-commits-since]
+
+    steps:
+
+      - run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+
+          \`\`\`json
+          $(jq <<< '${{ toJSON(needs.get-commits-since.outputs) }}')
+          \`\`\`
+
+          EOF
+
   call-pytest:
     needs: [get-commits-since]
     name: Run pytest (${{ fromJSON(needs.get-commits-since.outputs.sha-to-readable-map-json)[matrix.commit-sha] }})
