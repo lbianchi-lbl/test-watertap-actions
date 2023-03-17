@@ -26,6 +26,10 @@ on:
         description: Commits found in the given time range, as a JSON array string of SHAs
         value: ${{ jobs.set-commits.outputs.commits }}
 
+      sha-to-readable-map-json:
+        description: Mapping between SHA and readable version, as a JSON object string
+        value: ${{ jobs.set-commits.outputs.sha-to-readable-map }}
+
       time-range-start:
         description: Start of the time range
         value: ${{ inputs.since }}
@@ -74,12 +78,23 @@ jobs:
               out = check_output(args, text=True).strip()
               return out.splitlines()
 
+          def _get_readable(full_sha: str) -> str:
+              return full_sha[:8]
+
+          def _get_readable_mapping(commits: list[str]) -> dict[str, str]:
+              return {
+                  sha: _get_readable(sha)
+                  for sha in commits
+              }
+
 
           def main(args=None):
               args = args or sys.argv[1:]
               git_log_start = args[0]
               commits = _get_git_commits(git_log_start)
+              readable_map = _get_readable_mapping(commits)
               _set_output("commits", json.dumps(commits))
+              _set_output("sha-to-readable-map", json.dumps(readable_map))
 
           if __name__ == "__main__":
               start = os.environ["GIT_LOG_START"]

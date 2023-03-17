@@ -19,7 +19,7 @@ jobs:
 
   call-pytest:
     needs: [get-commits-since]
-    name: Run pytest (${{ matrix.commit-sha }})
+    name: Run pytest (${{ fromJSON(needs.get-commits-since.outputs.sha-to-readable-map-json)[matrix.commit-sha] }})
     uses: ./.github/workflows/pytest.yml
     strategy:
       fail-fast: true
