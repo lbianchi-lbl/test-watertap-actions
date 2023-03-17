@@ -26,6 +26,10 @@ inputs:
     required: false
     default: ""
 
+  save-as:
+    description: If given, the markdown source after processing will be saved as an artifact with that name
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -78,3 +82,9 @@ runs:
         </details>
 
         EOF
+
+    - if: inputs.save-as
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.save-as }}
+        path: ${{ env.GITHUB_STEP_SUMMARY }}
