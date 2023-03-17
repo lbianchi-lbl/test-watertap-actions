@@ -116,7 +116,7 @@ jobs:
         run:
           pytest
 
-      - name: Upload coverage report as artifact
+      - name: Upload coverage data as artifact
         uses: actions/upload-artifact@v3
         if: matrix.coverage
         with:
@@ -126,7 +126,7 @@ jobs:
             coverage.xml
 
   upload-coverage:
-    name: Upload coverage report (${{ matrix.platform }})
+    name: Upload coverage data (${{ matrix.platform }})
     needs: [run-pytest]
     runs-on: ubuntu-latest
     strategy:
@@ -136,18 +136,26 @@ jobs:
 
     steps:
 
-      - name: Download coverage report (${{ matrix.platform }})
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Make source code available to generate the coverage report locally
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.ref }}
+
+      - name: Download coverage data (${{ matrix.platform }})
         uses: actions/download-artifact@v3
         with:
           name: coverage-${{ matrix.platform }}
-
-      - uses: actions/setup-python@v4
 
       - name: Upload coverage report (placeholder)
         run: |
           pip install --progress-bar off "coverage>=7"
           cat << EOF >> "$GITHUB_STEP_SUMMARY"
-          # Coverage report for `${{ matrix.platform }}`
-          $(coverage report --data-file=.coverage --format=markdown) >>
+          # Coverage report for ${{ matrix.platform }}
+          $(coverage report --data-file=.coverage --format=markdown)
           EOF
 
