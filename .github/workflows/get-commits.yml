@@ -39,6 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       commits: ${{ steps.set-commits.outputs.commits }}
+      sha-to-readable-map: ${{ steps.set-commits.outputs.sha-to-readable-map }}
 
     steps:
 
