@@ -1,0 +1,23 @@
+name: Post-pytest
+
+on:
+  workflow_run:
+    types: [completed]
+    workflows: [Pytest]
+
+jobs:
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Access artifacts using gh
+        run:
+
+          gh run download --repo ${{ github.repository }} --pattern="*coverage*"
+
+          ls -lrth .
