@@ -84,7 +84,6 @@ runs:
         EOF
 
     - if: inputs.save-as
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ inputs.save-as }}
-        path: ${{ env.GITHUB_STEP_SUMMARY }}
+      shell: bash {0}
+      run: |
+        cat $GITHUB_STEP_SUMMARY
