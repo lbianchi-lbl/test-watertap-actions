@@ -67,7 +67,7 @@ jobs:
 
           def _set_output(name: str, value: str) -> None:
               with Path(os.environ["GITHUB_OUTPUT"]).open("at") as outf:
-                  outf.write(f"{name}={value}")
+                  print(f"{name}={value}", file=outf)
 
 
           def _get_git_commits(start: str, fmt="%H") -> list[str]:
