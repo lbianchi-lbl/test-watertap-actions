@@ -11,10 +11,17 @@ on:
 jobs:
   
   call-pytest:
+    name: Run pytest (${{ matrix.ref }})
     uses: ./.github/workflows/pytest.yml
+    strategy:
+      fail-fast: true
+      matrix:
+        ref:
+          - main
+          - refs/pull/966/merge
     with:
       repository: watertap-org/watertap
-      ref: main
+      ref: ${{ matrix.ref }}
       python-versions-json: '["3.8", "3.10"]'
       platforms-json: '["linux"]'
       variants-json: '["dev", "site"]'
