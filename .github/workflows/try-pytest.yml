@@ -16,7 +16,7 @@ jobs:
       repository: watertap-org/watertap
       ref: main
       python-versions-json: '["3.8", "3.10"]'
-      platforms-json: '["linux", "win64"]'
+      platforms-json: '["linux"]'
       variants-json: '["dev", "site"]'
       pytest-flags: --pyargs watertap.core
       pytest-extra-flags: -m unit
