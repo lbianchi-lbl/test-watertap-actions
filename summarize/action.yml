@@ -63,10 +63,13 @@ runs:
 
         Output of \`${{ inputs.command }}\`:
 
+        ${{ inputs.collapse && format('<details><summary>{0}</summary>', inputs.collapse) || ''}}
+
         \`\`\`log
         $(${{ inputs.command }})
         \`\`\`
 
+        ${{ inputs.collapse && '</details>' || ''}}
         EOF
 
     - if: inputs.save-as
