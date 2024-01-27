@@ -6,8 +6,6 @@ on:
       - custom-check/*
       - .github/workflows/test-custom-check.yml
 
-  pull_request:
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -19,7 +17,43 @@ jobs:
           token: ${{ secrets.WATERTAP_BOT_TOKEN }}
           repository: ${{ github.repository }}
           sha: ${{ github.sha }}
-          title: Test [${{ github.event_name }}]
+          title: My custom test [${{ github.event_name }}]
           body: Testing from ${{ github.workflow }} at $TIMESTAMP
           state: pending
+          job-name: ${{ github.job }}
+      - name: Wait after pending
+        run: sleep 10
+      - name: Test error
+        uses: ./custom-check
+        with:
+          token: ${{ secrets.WATERTAP_BOT_TOKEN }}
+          repository: ${{ github.repository }}
+          sha: ${{ github.sha }}
+          title: My custom test [${{ github.event_name }}]
+          body: Testing from ${{ github.workflow }} at $TIMESTAMP
+          state: error
+          job-name: ${{ github.job }}
+      - name: Wait after error
+        run: sleep 10
+      - name: Test failure
+        uses: ./custom-check
+        with:
+          token: ${{ secrets.WATERTAP_BOT_TOKEN }}
+          repository: ${{ github.repository }}
+          sha: ${{ github.sha }}
+          title: My custom test [${{ github.event_name }}]
+          body: Testing from ${{ github.workflow }} at $TIMESTAMP
+          state: failure
+          job-name: ${{ github.job }}
+      - name: Wait after failure
+        run: sleep 10
+      - name: Test success
+        uses: ./custom-check
+        with:
+          token: ${{ secrets.WATERTAP_BOT_TOKEN }}
+          repository: ${{ github.repository }}
+          sha: ${{ github.sha }}
+          title: My custom test [${{ github.event_name }}]
+          body: Testing from ${{ github.workflow }} at $TIMESTAMP
+          state: success
           job-name: ${{ github.job }}
