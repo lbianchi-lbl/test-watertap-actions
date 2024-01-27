@@ -85,7 +85,7 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.token }}
       run: |
-        _target_url="$(gh run -R ${{ github.repository }} view ${{ github.run_id}} --json jobs --jq '.jobs[] | select(.name == \"${{ inputs.job-name }})\" | .url')"
+        _target_url=$(gh run -R ${{ github.repository }} view ${{ github.run_id}} --json jobs --jq '.jobs[] | select(.name == "${{ inputs.job-name }})" | .url')
         echo "_TARGET_URL=$_target_url" >> $GITHUB_ENV
 
     - name: Create commit status
