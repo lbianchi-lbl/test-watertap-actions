@@ -1,0 +1,102 @@
+name: Custom check
+description: Create custom check using the GitHub commit status API
+
+inputs:
+
+  token:
+    required: true
+    description: Access token with sufficient permissions for the target repository
+
+  state:
+    required: true
+    description: "Any of the states allowed by the commit status API: error, failure, pending, success"
+
+  title: 
+    description: Will be used for the `context` field of the commit status
+    required: false
+    default: ${{ github.workflow }}
+
+  body:
+    required: true
+    description: |
+      Will be used for the `description` field of the commit status. The following variables will be present in the Bash env and can be used for templating:
+
+      - $TIMESTAMP: Current date/time in ISO format
+      - $TIMESTAMP_TZ: Current date/time in readable format with the configured timezone
+
+  url:
+    required: false
+    description: URL that will be associated with the "details" link in the PR view.
+    default: ''
+
+  job-name:
+    required: false
+    description: If `url` is not given, will be used to get the URL by querying jobs in the current workflow run
+    default: ''
+
+  repository:
+    required: false
+    description: Repository (owner/name) containing the commit to annotate. Defaults to the repository running the workflow.
+    default: ${{ github.repository }}
+
+  sha:
+    required: false
+    description: SHA of the commit to annotate. Defaults to the currently checked out commit.
+    default: ''
+
+  display-timezone:
+    required: false
+    description: Timezone to use for the timestamp to include in the description
+    default: America/New_York
+
+runs:
+  using: composite
+  steps:
+
+    - name: Set _COMMIT_SHA from input value
+      if: inputs.sha
+      id: get-commit
+      shell: bash
+      run: |
+        echo "_COMMIT_SHA=${{ inputs.sha }}" >> $GITHUB_ENV
+        
+    - name: Set _COMMIT_SHA to currently checked out commit
+      if: ${{ !inputs.sha }}
+      id: get-commit
+      shell: bash
+      run: |
+        git log -n 1
+        commit_sha="$(git log -n 1 --format='%H')"
+        echo "_COMMIT_SHA=$commit_sha" >> $GITHUB_ENV
+
+    - name: Set _TARGET_URL to input URL
+      if: inputs.url
+      shell: bash
+      run: |
+        echo "_TARGET_URL=${{ inputs.url }}" >> $GITHUB_ENV
+
+    - name: Set _TARGET_URL to URL for specified job in current run
+      if: ${{ inputs.job-name }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        _target_url="$(gh run -R ${{ github.repository }} view ${{ github.run_id}} --json jobs --jq '.jobs[] | select(.name == ${{ inputs.job-name }}) | .url')"
+        echo "_TARGET_URL=$_target_url" >> $GITHUB_ENV
+
+    - name: Create commit status
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        TIMESTAMP="$(date --iso-8601=seconds)"
+        TIMESTAMP_TZ="$(TZ='${{ inputs.display-timezone }}' date)"
+
+        gh api \
+        --method POST \
+        -H "Accept: application/vnd.github+json" \
+        /repos/${{ inputs.repository }}/statuses/$_COMMIT_SHA \
+        -f context="${{ inputs.title }}" \
+        -f state=${{ inputs.state }} \
+        -f description="${{ inputs.description }}" \
+        -f target_url="$_TARGET_URL"
