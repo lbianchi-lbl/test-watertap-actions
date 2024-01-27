@@ -102,5 +102,5 @@ runs:
         /repos/${{ inputs.repository }}/statuses/$_COMMIT_SHA \
         -f context="${{ inputs.title }}" \
         -f state=${{ inputs.state }} \
-        -f description="${{ inputs.description }}" \
+        -f description="${{ inputs.body }}" \
         -f target_url="$_TARGET_URL"
