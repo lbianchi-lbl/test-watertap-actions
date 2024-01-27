@@ -6,7 +6,11 @@ concurrency:
 
 on:
   push:
-
+    paths:
+      - .github/workflows/get-commits.yml
+      - .github/workflows/pytest.yml
+      - .github/workflows/try-pytest.yml
+      - summarize/*
 
 jobs:
 
@@ -27,7 +31,6 @@ jobs:
         with:
           json: ${{ toJSON(needs.get-commits-since.outputs) }}
           collapse: needs.get-commits-since.outputs
-          save-as: display-commits-md
 
   call-pytest:
     needs: [get-commits-since]

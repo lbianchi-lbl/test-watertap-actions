@@ -2,10 +2,12 @@ name: Summarize
 description: Convenience wrapper to render different snippets of data to GITHUB_STEP_SUMMARY
 
 inputs:
+
   header:
     description: Header to display before content
     required: false
     default: ""
+
   separator:
     description: Separator to add after content
     required: false
@@ -23,11 +25,6 @@ inputs:
     
   collapse:
     description: If given, will wrap in a <details></details> tag with the argument as <summary>
-    required: false
-    default: ""
-
-  save-as:
-    description: If given, the markdown source after processing will be saved as an artifact with that name
     required: false
     default: ""
 
@@ -63,14 +60,11 @@ runs:
 
         Output of \`${{ inputs.command }}\`:
 
+        ${{ inputs.collapse && format('<details><summary>{0}</summary>', inputs.collapse) || ''}}
+
         \`\`\`log
         $(${{ inputs.command }})
         \`\`\`
 
+        ${{ inputs.collapse && '</details>' || ''}}
         EOF
-
-    - if: inputs.save-as
-      shell: bash {0}
-      run: |
-        cat $GITHUB_STEP_SUMMARY
-
