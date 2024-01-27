@@ -17,7 +17,7 @@ jobs:
         uses: ./custom-check
         with:
           repository: ${{ github.repository }}
-          ref: ${{ github.sha }}
+          sha: ${{ github.sha }}
           title: Test [${{ github.event_name }}]
           body: Testing from ${{ github.workflow }} at $TIMESTAMP
           state: pending
