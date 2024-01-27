@@ -55,14 +55,12 @@ runs:
 
     - name: Set _COMMIT_SHA from input value
       if: inputs.sha
-      id: get-commit
       shell: bash
       run: |
         echo "_COMMIT_SHA=${{ inputs.sha }}" >> $GITHUB_ENV
         
     - name: Set _COMMIT_SHA to currently checked out commit
       if: ${{ !inputs.sha }}
-      id: get-commit
       shell: bash
       run: |
         git log -n 1
