@@ -16,6 +16,7 @@ jobs:
       - name: Test pending
         uses: ./custom-check
         with:
+          token: ${{ secrets.WATERTAP_BOT_TOKEN }}
           repository: ${{ github.repository }}
           sha: ${{ github.sha }}
           title: Test [${{ github.event_name }}]
