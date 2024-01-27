@@ -2,6 +2,10 @@ name: Test custom-check action
 
 on:
   push:
+    paths:
+      - custom-check/*
+      - .github/workflows/test-custom-check.yml
+
   pull_request:
 
 jobs:
