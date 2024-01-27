@@ -53,6 +53,12 @@ runs:
   using: composite
   steps:
 
+    - name: Validate inputs
+      shell: bash
+      run: |
+        [[ "${{ inputs.token }}" ]] || { echo "missing required input 'token'" ; exit 1 ; }
+        [[ "${{ inputs.state }}" ]] || { echo "missing required input 'state'" ; exit 1 ; }
+
     - name: Set _COMMIT_SHA from input value
       if: inputs.sha
       shell: bash
